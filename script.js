@@ -37,13 +37,31 @@ function onAddItemSubmit(e) {
         return;
     }
 
+    // Check for edit mode
+    if (isEditMode) {
+        // Grabs item to be modified
+        const itemToEdit = itemList.querySelector('.edit-mode');
+        // Removing inner text to be edited in localStorage
+        removeItemFromStorage(itemToEdit.textContent);
+        itemToEdit.classList.remove('edit-mode');
+        //Removes from DOM
+        itemToEdit.remove();
+        isEditMode = false;
+    } else {
+        // This else allows the edit 
+        if (checkIfItemExists(newItem)) {
+            alert('Item already exists');
+            return;
+        }
+    }
+
     // Created DOM element
     addItemToDOM(newItem);
 
     // Add item to LS
     addItemToStorage(newItem);
 
-    checkUI();
+    resetUI();
     // Clearing the input
     itemInput.value = '';
 }
@@ -122,17 +140,29 @@ function onClickItem(e) {
     }
 }
 
+// Checks if item currently exists
+function checkIfItemExists(item) {
+    const itemsFromStorage = getItemsFromLocalStorage();
+    return itemsFromStorage.includes(item);
+}
+
+
 function setItemToEdit(item) {
     // Setting the edit mode to true
     isEditMode = true;
+
+    // Returns text color to default when unselected
+    itemList.querySelectorAll('li')
+        .forEach(i => i.classList.remove('edit-mode'));
+
     // Changes style once clicked
     item.classList.add('edit-mode');
     //
-    formBtn.innerHTML = '<i class="fa-solid fa-pen"></i>  Update Item'
-    formBtn.style.backgroundColor = 'green'
+    formBtn.innerHTML = '<i class="fa-solid fa-pen"></i>  Update Item';
+    formBtn.style.backgroundColor = 'green';
     // Passing textContent to the input field for editing
     itemInput.value = item.textContent;
-    localStorage.setItem('item')
+    // localStorage.setItem('item');
 
 
 }
@@ -145,7 +175,7 @@ function removeItem(item) {
         // Remove item from, storage
         removeItemFromStorage(item.textContent);
         // Checks is list items are available if so shows clear button if not hides it.
-        checkUI();
+        resetUI();
     }
 }
 
@@ -172,7 +202,7 @@ function clearItems(item) {
     localStorage.removeItem('items');
 
     // Hides the clear button and filter input
-    checkUI();
+    resetUI();
 }
 
 function filterItems(e) {
@@ -197,7 +227,9 @@ function filterItems(e) {
 }
 
 // Function for clearing the li list items in the ul
-function checkUI(e) {
+function resetUI(e) {
+    // Setting itemInput value to nothing
+    itemInput.value = '';
     // Clears the list items. Passing in itemList since it ID is the parent element
     const items = itemList.querySelectorAll('li');
     // If list is null
@@ -210,6 +242,14 @@ function checkUI(e) {
         clearButton.style.display = 'block';
         itemFilter.style.display = 'block';
     }
+
+    // Maintains style of button when not in edit mode
+    formBtn.innerHTML = ' <i class="fa-solid fa-plus"></i> Add Item';
+    formBtn.style.backgroundColor = '#333';
+
+    // Setting edit to false
+
+    isEditMode = false;
 }
 
 
@@ -227,7 +267,7 @@ function init() {
     // Event for page load to 
     document.addEventListener('DOMContentLoaded', displayItems);
     // Invoked on page load.
-    checkUI();
+    resetUI();
 }
 
 // Invoking function for page
